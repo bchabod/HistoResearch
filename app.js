@@ -8,6 +8,7 @@ var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
+require('lodash-express')(app, 'html');
 app.set('view engine', 'html');
 
 // uncomment after placing your favicon in /public
