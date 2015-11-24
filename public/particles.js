@@ -3,7 +3,7 @@ function launchParticlesJS(e, i) {
     pJS.fn.canvasInit(), pJS.fn.canvasSize(), pJS.fn.canvasPaint(), pJS.fn.particlesCreate(), pJS.fn.particlesDraw()
   }
   function t() {
-    pJS.fn.particlesDraw(), pJS.fn.requestAnimFrame = requestAnimFrame(t)
+    //pJS.fn.particlesDraw(), pJS.fn.requestAnimFrame = requestAnimFrame(t)
   }
   var n = e;
   if (pJS = {

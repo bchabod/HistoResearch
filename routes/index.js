@@ -96,18 +96,15 @@ var getURIs = function(pages) {
             "content-type":"application/x-www-form-urlencoded"
           }
         };
-        console.log("Récupération des URI de l'URL numéro" + offset);
         offset++;
         return rp(options);
       }).then(function(body) {
         body = JSON.parse(body);
         for(var element in body["Resources"]){
           var URI = body["Resources"][element]["@URI"];
-          console.log(URI);
           URIs.push(URI);
         }
         if(offset==8) {
-          console.log("Promesse résolue : ",URIs);
           resolve(URIs);
         }
       }).catch(function(error) {
@@ -118,31 +115,23 @@ var getURIs = function(pages) {
   return P;
 }
 
-router.get('/test', function(req, res, next) {
-  var keyword = "Hello";
+router.post('/search', function(req, res, next) {
+  var keyword = req.body.keywords;
   getResult(keyword).then(function(URLs) {
     return getTexts(URLs);
   })
   .then(function(texts) {
-    console.log("Recherche des URIs");
     return getURIs(texts);
   })
   .then(function(URIs) {
-    console.log("Fin de la recherche");
     res.send(URIs);
   })
   .catch(function(err) {
     res.send(err);
   });
-  console.log("lol");
 });
 
 router.get('/search', function(req, res, next) {
-  res.render('search');
-});
-
-router.post('/search', function(req, res, next) {
-  console.log(req);
   res.render('search');
 });
 
