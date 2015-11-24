@@ -13,7 +13,9 @@
     "jade": "~1.9.2",
     "lodash-express": "0.0.3",
     "morgan": "~1.5.3",
+    "promise-js": "0.0.6",
     "request": "^2.65.0",
+    "request-promise": "^1.0.2",
     "serve-favicon": "~2.2.1"
   }
 }
