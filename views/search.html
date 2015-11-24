@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>WebSearch</title>
+
+  <link rel="stylesheet" type="text/css" href="segmented-control.css">
+  <link rel="stylesheet" type="text/css" href="checkbox.css">
+  <link rel="stylesheet" type="text/css" href="bar.css">
+  <link rel="stylesheet" type="text/css" href="main.css">
+  
+</head>
+
+<body>
+
+  <header>
+    <h1>
+      <a href="/"><span class="brand">WebSearch</span></a></span>, by
+      <a href="http://google.fr" target="_blank">
+        <img src="logo-s.png">
+      </a>
+    </h1>
+  </header>
+
+  <div class="separator"></div>
+
+  <section role="content" id="particles-js">
+
+    <canvas style="width: 25%; height: 100%; position:absolute; top:0px; left:0px"></canvas>
+    <canvas style="width: 25%; height: 100%; position:absolute; top:0px; right:0px"></canvas>
+
+    <div id="container" style="z-index: 1; position:relative">
+
+      <h2>What do you want to know ?</h2>
+      <p>Waddup bro waddup loilol sheguey duh</p>
+
+      <form method="post" action="/search">
+
+        <div class="form-group">
+          <label>Search engine used : </label>
+          <div class="segmented-control">
+            <input type="radio" name="engine" id="engine0" value="google"  checked  />
+            <input type="radio" name="engine" id="engine1" value="duck"  />
+            <label for="engine0" data-value="Google">Google</label>
+            <label for="engine1" data-value="Duck Duck Go">Duck Duck Go</label>
+          </div>
+        </div>
+
+        <input type="text" name="keywords" placeholder="Enter keywords here...">
+        <button type="submit" name="searchButton">Search</button>
+
+      </form>
+
+    </div>
+
+  </section>
+
+  <div class="separator"></div>
+
+  <footer>
+    <p>Copyright (c) 2015 <a href="http://google.fr" target="_blank">@WebSearch</a>.</p>
+  </footer>
+
+  <script src="particles.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,131 @@
+/* Main CSS dirty fixes */
+
+@font-face {
+  font-family: "museo-slab";
+  font-style: normal;
+  font-weight: 500;
+  src: url("font-museo-slab");
+}
+
+body {
+  background: #141818;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  text-align: center;
+  color: #eeeeee;
+}
+
+h1, h2, h3 {
+  font-family: museo-slab,Georgia,"Times New Roman",Times,serif;
+  font-weight: normal;
+}
+
+h1 {
+  font-size: 3.0rem;
+}
+
+h2 {
+  font-size: 2.6rem;
+}
+
+h3 {
+  font-size: 2.2rem;
+}
+
+img {
+  vertical-align: middle;
+  margin: 2.0rem;
+}
+
+a {
+  font-size: 1.5rem;
+  color: #337A7;
+  text-decoration: none;
+}
+
+button {
+  margin-top: 3rem;
+  font-size: 2rem;
+}
+
+p {
+  font-size: 1.5rem;
+  margin: 2.5rem;
+}
+
+.brand {
+  color: #Ef7620;
+  font-size: 3rem;
+}
+
+.separator {
+  margin: 0 auto;
+  width: 50%;
+  border-bottom: 0.1rem solid;
+}
+
+section {
+  padding: 0.5rem;
+}
+
+.form-group {
+  margin: 0 auto;
+  width: 50%;
+  display: flex;
+  flex-flow: row wrap;
+  margin-bottom: 2.0rem;
+}
+
+label {
+  font-size: 1.5rem;
+  width: 20rem;
+  align-self: center;
+  text-align: left;
+}
+
+input {
+  display: block;
+  margin: 0 auto;
+  width: 30%;
+  height: 34px;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857;
+  color: #555;
+  background-color: #FFF;
+  background-image: none;
+  border: 1px solid #CCC;
+  border-radius: 4px;
+  box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.075) inset;
+  transition: border-color 1.5s ease-in-out 1s, box-shadow 1.5s ease-in-out 1s;
+}
+
+input:focus {
+  outline: none;
+  border-color: #9ecaed;
+  box-shadow: 0 0 20px #9ecaed;
+  transition: border-color 1.5s ease-in-out 1s, box-shadow 1.5s ease-in-out 1s;
+}
+
+/* FIXES FOR MOBILE DEVICES */
+@media screen and (max-width:80rem) {
+
+  label {
+    font-size: 3rem;
+    width: 20rem;
+    flex-grow: 2;
+  }
+
+  .form-group {
+    width: 90%;
+  }
+
+  .css-label-yellow {
+    height: 8rem;
+    width: 8rem;
+  }
+
+  .css-checkbox:checked+.css-label-yellow {
+    background-position: 0 -8.1rem;
+  }
+
+}

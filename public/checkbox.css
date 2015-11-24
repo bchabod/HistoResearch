@@ -1,0 +1,67 @@
+/*
+----------------------------------------------------------
+-------------------- COOL CHECKBOXES ---------------------
+----------- http://jsfiddle.net/bigdeee/gNdAM/12/ --------
+----------------- Courtesy of BigDeee --------------------
+----------------------------------------------------------
+*/
+
+
+.checkbox.custom {
+  float: left;
+  margin: 0;
+  padding: 0;
+  display: block;
+  width: 100%;
+  margin-bottom: 2.0rem;
+}
+
+input[type="checkbox"].custom {
+  margin-left: 0;
+  padding: 0;
+}
+
+/*
+  Stays in pixels because it doesn't need to be resized
+*/
+input[type=checkbox].css-checkbox {
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+}
+
+input[type=checkbox].css-checkbox+label.css-label-yellow {
+  height: 6rem;
+  width: 6rem;
+  display: inline-block;
+  line-height: 1.5rem;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: cover;
+  font-size: 1.3rem;
+  vertical-align: middle;
+  cursor: pointer;
+  opacity: 1;
+  -webkit-transition: all .2s ease-out;
+  -moz-transition: all .2s ease-out;
+  -ms-transition: all .2s ease-out;
+  -o-transition: all .2s ease-out;
+  transition: all .2s ease-out;
+}
+
+input[type=checkbox].css-checkbox+label.css-label-yellow:hover {
+  opacity: 0.5;
+}
+
+input[type=checkbox].css-checkbox:checked+label.css-label-yellow {
+  background-position: 0 -6.1rem;
+}
+
+.css-label-yellow {
+  background-image: url("check.png");
+}

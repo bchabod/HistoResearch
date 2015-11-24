@@ -1,0 +1,47 @@
+/*
+----------------------------------------------------------
+--------------------- PROGRESS BARS ----------------------
+- http://red-team-design.com/stylish-css3-progress-bars --
+------------------- Courtesy of RTD ----------------------
+----------------------------------------------------------
+*/
+
+.progress-bar {
+  background-color: #1a1a1a;
+  text-align: left;
+  height: 2.5rem;
+  padding: 0.5rem;
+  width: 35rem;
+  margin: 5rem auto;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 5px #000 inset, 0 1px 0 #444;
+}
+
+.progress-bar span {
+  display: inline-block;
+  height: 100%;
+  border-radius: 0.3rem;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset;
+  transition: width .4s ease-in-out;
+}
+
+.blue span {
+  background-color: #337AB7;
+}
+
+.orange span {
+  background-color: #EF7620;
+  background-image: linear-gradient(top, #ED7422, #EF7620);
+}
+
+.stripes span {
+  background-size: 3rem 3rem;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, .15) 25%, transparent 25%,
+    transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%,
+    transparent 75%, transparent);
+  animation: animate-stripes 3s linear infinite;
+}
+
+@keyframes animate-stripes {
+  0% {background-position: 0 0;} 100% {background-position: 6rem 0;}
+}

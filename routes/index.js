@@ -137,16 +137,14 @@ router.get('/test', function(req, res, next) {
   console.log("lol");
 });
 
-/*router.get('/test', function(req, res, next) {
-  var keyword = "Hello";
-  getResult(keyword).then(function(URLs) {
-    return getTexts(URLs);
-  })
-  .then(function(texts) {
-    res.send(texts);
-  });
-});*/
+router.get('/search', function(req, res, next) {
+  res.render('search');
+});
+
+router.post('/search', function(req, res, next) {
+  console.log(req);
+  res.render('search');
+});
 
 module.exports = router;
-
 
