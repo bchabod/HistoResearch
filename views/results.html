@@ -16,10 +16,8 @@
 
   <header>
     <h1>
-      <a href="/"><span class="brand">WebSearch</span></a></span>, by
-      <a href="http://google.fr" target="_blank">
-        <img src="logo-s.png">
-      </a>
+      <a href="/search"><span class="brand">Historesearch</span></a></span>, by
+      <span class="brand">H4104</span>
     </h1>
   </header>
 
@@ -32,15 +30,15 @@
 
     </form>
   </div>
+
   <div id="container" style="text-align: left; left=10%">
-      <!-- for loop -->
     <% for (var i=0 ; i<array.length;++i) {%>
-        <a href=<%="\""+ array[i]+"\""%> style="color: white"><%= array[i] %></a> </br>
+        <a href="<%= array[i] %>" style="color: white"><%= array[i] %></a> </br>
     <% } %>
   </div>
 
     <footer>
-    <p>Copyright (c) 2015 <a href="http://google.fr" target="_blank">@WebSearch</a>.</p>
+    <p>Copyright (c) 2015 <a href="/search" target="_blank">@Historesearch</a>.</p>
   </footer>
 </body>
 </html>

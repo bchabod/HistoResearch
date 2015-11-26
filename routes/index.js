@@ -2,6 +2,8 @@ var express = require('express');
 var request = require('request');
 var rp = require('request-promise');
 var Promise = require('promise-js');
+var fs = require('fs');
+var _ = require('lodash');
 var router = express.Router();
 
 var prevURIs=[];
@@ -112,43 +114,51 @@ function splitText(texts) {
 
 router.post('/search', function(req, res, next) {
   var keyword = req.body.keywords;
-  console.log("Request for keywords : ", keyword);
-  getResult(keyword).then(function(URLs) {
-    console.log("Got URLs (",URLs.length,")");
-    return getTexts(URLs);
-  })
-  .then(function(texts) {
-    console.log("Got texts (",texts.length,")");
-    texts = splitText(texts);
-    return getURIs(texts);
-  })
-  .then(function(URIs) {
-    console.log("Got results (",URIs.length,")");
-    URIs.sort();
-    URIs=computeUniqueArray(URIs);
-    console.log(computeCoeffJaccard(prevURIs,URIs));
-    prevURIs=URIs;
-    res.render("results",{array : URIs});
-  })
-  .catch(function(err) {
-    console.log("Got error - ", err);
-    res.send(err);
-  });
+  var cachePath = './cache/' + keyword;
+
+  if (fs.existsSync(cachePath)) {
+    console.log("Cache for keywords : ", keyword);
+    fs.readFile(cachePath, 'utf8', function (err,data) {
+      if (err) {
+        return console.log("Error reading cache - ", err);
+      }
+      data = JSON.parse(data);
+      res.render("results",{array : data.ressources});
+    });
+  } else {
+    console.log("Request for keywords : ", keyword);
+    getResult(keyword).then(function(URLs) {
+      console.log("Got URLs (",URLs.length,")");
+      return getTexts(URLs);
+    })
+    .then(function(texts) {
+      console.log("Got texts (",texts.length,")");
+      texts = splitText(texts);
+      return getURIs(texts);
+    })
+    .then(function(URIs) {
+      URIs = _.uniq(URIs).sort();
+      console.log("Got results (",URIs.length,")");
+      res.render("results",{array : URIs});
+      var output = {ressources : URIs};
+      fs.writeFile(cachePath, JSON.stringify(output), function(err) {
+          if(err) {
+            console.log("Error writing cache - ", err);
+          } else {
+            console.log("Request saved to " + cachePath);
+          }
+      }); 
+    })
+    .catch(function(err) {
+      console.log("Got error - ", err, err.stack);
+      res.send(err);
+    });
+  }
 });
 
 router.get('/search', function(req, res, next) {
   res.render('search');
 });
-
-function computeUniqueArray(array){
-  var res=[];
-  res.push(array[0]);
-  for(var i=1;i<array.length;++i){
-    if(array[i]!=array[i-1])
-      res.push(array[i]);
-  }
-  return res;
-};
 
 function computeCoeffJaccard(arrayURI1,arrayURI2){
   var total= arrayURI1.length + arrayURI2.length;

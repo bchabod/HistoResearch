@@ -250,7 +250,7 @@ window.particlesJS && particlesJS("particles-js", {
     },
     anim: {
       enable: !0,
-      speed: 2
+      speed: 3
     },
     array: []
   },
