@@ -2,6 +2,8 @@ var express = require('express');
 var request = require('request');
 var rp = require('request-promise');
 var Promise = require('promise-js');
+var jade = require('jade');
+var fs = require('fs');
 var router = express.Router();
 
 /* GET home page. */
@@ -124,7 +126,7 @@ router.post('/search', function(req, res, next) {
     return getURIs(texts);
   })
   .then(function(URIs) {
-    res.send(URIs);
+    res.render("results",{array : URIs});
   })
   .catch(function(err) {
     res.send(err);
