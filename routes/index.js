@@ -4,6 +4,8 @@ var rp = require('request-promise');
 var Promise = require('promise-js');
 var router = express.Router();
 
+var prevURIs=[];
+
 function promiseLoop(array,optionsCallback,resultCallback) {
   var output = [];
   var counter = 0;
@@ -122,6 +124,10 @@ router.post('/search', function(req, res, next) {
   })
   .then(function(URIs) {
     console.log("Got results (",URIs.length,")");
+    URIs.sort();
+    URIs=computeUniqueArray(URIs);
+    console.log(computeCoeffJaccard(prevURIs,URIs));
+    prevURIs=URIs;
     res.render("results",{array : URIs});
   })
   .catch(function(err) {
@@ -134,16 +140,27 @@ router.get('/search', function(req, res, next) {
   res.render('search');
 });
 
+function computeUniqueArray(array){
+  var res=[];
+  res.push(array[0]);
+  for(var i=1;i<array.length;++i){
+    if(array[i]!=array[i-1])
+      res.push(array[i]);
+  }
+  return res;
+};
+
 function computeCoeffJaccard(arrayURI1,arrayURI2){
   var total= arrayURI1.length + arrayURI2.length;
   var matching=0;
   for(var i=0;i<arrayURI1.length;++i){
     for(var j=0;j<arrayURI2.length;++j)
     {
-      if(arrayURI1[i]==arrayURI2[j])
+      if(arrayURI1[i]===arrayURI2[j])
         matching++;  
     }
   }
+
   return matching/(total - matching);
 };
 
