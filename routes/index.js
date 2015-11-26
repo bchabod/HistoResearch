@@ -2,133 +2,130 @@ var express = require('express');
 var request = require('request');
 var rp = require('request-promise');
 var Promise = require('promise-js');
-var jade = require('jade');
-var fs = require('fs');
 var router = express.Router();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  var url = 'http://google.fr';
-  var callback = function(error, response, body) {
-    if (error || response.statusCode !== 200) {
-      res.status(500).send();
-    } else {
-      res.send(body);
+function promiseLoop(array,optionsCallback,resultCallback) {
+  var output = [];
+  var counter = 0;
+  var finalPromise = new Promise(function(resolve, reject) {
+    array.forEach(function(element) {
+      var options = optionsCallback(element);
+      rp(options).then(function(body) {
+        output = resultCallback(body, output);
+        counter++;
+        if(counter == array.length) {
+          resolve(output);
+        }
+      }).catch(function(error) {
+        counter++;
+        if(counter == array.length) {
+          resolve(output);
+        }
+      });
+    });
+  });
+  return finalPromise;
+}
+
+function getResult (keyword) {
+  var optionsCallback = function(offset) {
+    return {
+      method: 'get',
+      url : 'https://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=8&q=' + encodeURI(keyword) + '&start=' + offset,
+      headers: {
+        'Accept':'application/json',
+      }
+    };
+  };
+  var buildResult = function(body, links) {
+    body = JSON.parse(body);
+    for(var element in body["responseData"]["results"]){
+      var URL = body["responseData"]["results"][element]["url"];
+      links.push(URL);
+    }
+    return links;
+  }
+  var offsets = [0];
+  return promiseLoop(offsets, optionsCallback, buildResult);
+}
+
+function getTexts (urls) {
+  var optionsCallback = function(url) {
+    return {
+      method: 'get',
+      url : 'https://access.alchemyapi.com/calls/url/URLGetText?apikey=df295c00eafc10dcecf7318f57c54d216107017f&url=' + url + '&outputMode=json',
+      headers: {
+        'Accept':'application/json',
+      }
     }
   };
-  request(url, callback);
-});
-
-var getResult = function(keyword) {
-  var offsets = [0];
-  var links = [];
-  var prevPromise = Promise.resolve();
-  var P = new Promise(function(resolve, reject) {
-    offsets.forEach(function(offset) {  // loop through each title
-      prevPromise = prevPromise.then(function() {
-        var options = {
-          method: 'get',
-          url : 'https://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=8&q=' + encodeURI(keyword) + '&start=' + offset,
-          headers: {
-            'Accept':'application/json',
-          }
-        };
-        return rp(options);
-      }).then(function(body) {
-        body = JSON.parse(body);
-        for(var element in body["responseData"]["results"]){
-          var URL = body["responseData"]["results"][element]["url"];
-          links.push(URL);
-        }
-        if(offset==0) {
-          resolve(links);
-        }
-      }).catch(function(error) {
-        reject(error);
-      });
-    });
-  });
-  return P;
+  var buildResult = function(body, texts) {
+    body = JSON.parse(body);
+    texts.push(body["text"]);
+    return texts;
+  }
+  return promiseLoop(urls, optionsCallback, buildResult);
 }
 
-var getTexts = function(urls) {
-  var texts = [];
-  var offset = 0;
-  var prevPromise = Promise.resolve();
-  var P = new Promise(function(resolve, reject) {
-    urls.forEach(function(url) {  // loop through each title
-      prevPromise = prevPromise.then(function() {
-        var options = {
-          method: 'get',
-          url : 'https://access.alchemyapi.com/calls/url/URLGetText?apikey=e94f1ec1221a30783b1e20bfca48c003b9628b27&url=' + url + '&outputMode=json',
-          headers: {
-            'Accept':'application/json',
-          }
-        };
-        offset++;
-        return rp(options);
-      }).then(function(body) {
-        body = JSON.parse(body);
-        texts.push(body["text"]);
-        if(offset==8) {
-          resolve(texts);
-        }
-      }).catch(function(error) {
-        reject(error);
-      });
-    });
-  });
-  return P;
+function getURIs (pages) {
+  var confidence = 0.2;
+  var support = 80;
+  var timeout = 30000;
+  console.log("Got text splits : " , pages.length);
+  var optionsCallback = function(page) {
+    return {
+      method: 'get',
+      url : 'http://spotlight.dbpedia.org/rest/annotate?text=' + encodeURI(page) + '&confidence=' + confidence + '&support=' + support + '&timeout=' + timeout,
+      headers: {
+        'Accept':'application/json'
+      }
+    }
+  };
+  var buildResult = function(body, URIs) {
+    console.log("Got one bunch of URIs");
+    body = JSON.parse(body);
+    for(var element in body["Resources"]){
+      var URI = body["Resources"][element]["@URI"];
+      URIs.push(URI);
+    }
+    return URIs;
+  }
+  return promiseLoop(pages, optionsCallback, buildResult);
 }
 
-var getURIs = function(pages) {
-  var URIs = [];
-  var offset = 0;
-  var confidence = 0.1;
-  var support = 50;
-  var prevPromise = Promise.resolve();
-  var P = new Promise(function(resolve, reject) {
-    pages.forEach(function(page) {
-      prevPromise = prevPromise.then(function() {
-        var options = {
-          method: 'post',
-          url : 'http://spotlight.dbpedia.org/rest/annotate?text=' + page + '&confidence=' + confidence + '&support=' + support,
-          headers: {
-            'Accept':'application/json',
-            "content-type":"application/x-www-form-urlencoded"
-          }
-        };
-        offset++;
-        return rp(options);
-      }).then(function(body) {
-        body = JSON.parse(body);
-        for(var element in body["Resources"]){
-          var URI = body["Resources"][element]["@URI"];
-          URIs.push(URI);
-        }
-        if(offset==8) {
-          resolve(URIs);
-        }
-      }).catch(function(error) {
-        //reject(error);
-      });
-    });
+function splitText(texts) {
+  console.log("Splitting texts ! ");
+  var MAX = 1500;
+  var newTexts = [];
+  texts.forEach(function(element) {
+    var offset = 0;
+    while(offset<element.length) {
+      var substr = element.substring(offset,offset+Math.min(element.length-offset,MAX));
+      newTexts.push(substr);
+      offset += MAX;
+    }
   });
-  return P;
+  return newTexts;
 }
 
 router.post('/search', function(req, res, next) {
   var keyword = req.body.keywords;
+  console.log("Request for keywords : ", keyword);
   getResult(keyword).then(function(URLs) {
+    console.log("Got URLs (",URLs.length,")");
     return getTexts(URLs);
   })
   .then(function(texts) {
+    console.log("Got texts (",texts.length,")");
+    texts = splitText(texts);
     return getURIs(texts);
   })
   .then(function(URIs) {
+    console.log("Got results (",URIs.length,")");
     res.render("results",{array : URIs});
   })
   .catch(function(err) {
+    console.log("Got error - ", err);
     res.send(err);
   });
 });
