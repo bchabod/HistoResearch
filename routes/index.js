@@ -134,5 +134,18 @@ router.get('/search', function(req, res, next) {
   res.render('search');
 });
 
+function computeCoeffJaccard(arrayURI1,arrayURI2){
+  var total= arrayURI1.length + arrayURI2.length;
+  var matching=0;
+  for(var i=0;i<arrayURI1.length;++i){
+    for(var j=0;j<arrayURI2.length;++j)
+    {
+      if(arrayURI1[i]==arrayURI2[j])
+        matching++;  
+    }
+  }
+  return matching/(total - matching);
+};
+
 module.exports = router;
 
