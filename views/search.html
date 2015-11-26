@@ -31,12 +31,13 @@
 
       <h2>What do you want to know ?</h2>
       <p>Welcome to Historesearch, the first event analysis website !<br/>
-      Please enter a few keywords below.</p>
-
+      Please enter a few keywords below, and set parameters.</p>
 
       <form method="post" action="/search">
 
-        <input type="text" name="keywords" placeholder="Enter keywords here...">
+        <p style="margin: 0.5rem;"> Confidence : <span class="val" id="confidence">0.6</span></p> 0.1 <input type="range" id="slider_confidence" min="1" max="10" name="confidence"> 1.0 <br/>
+        <p style="margin: 0.5rem;"> Support : <span class="val" id="support">60</span></p> 20 <input type="range" id="slider_support" min="20" max="100" name="support"> 100 <br/><br/>
+        <input style="margin-top: 2.5rem;" type="text" name="keywords" placeholder="Enter keywords here...">
         <button type="submit" name="searchButton">Search</button>
 
       </form>
@@ -51,6 +52,7 @@
     <p>Copyright (c) 2015 <a href="/search" target="_blank">@Historesearch</a>.</p>
   </footer>
 
+  <script src="main.js"></script>
   <script src="particles.js"></script>
 
 </body>

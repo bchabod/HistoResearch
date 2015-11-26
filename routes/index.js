@@ -71,9 +71,7 @@ function getTexts (urls) {
   return promiseLoop(urls, optionsCallback, buildResult);
 }
 
-function getURIs (pages) {
-  var confidence = 0.2;
-  var support = 80;
+function getURIs (pages, confidence, support) {
   var timeout = 30000;
   console.log("Got text splits : " , pages.length);
   var optionsCallback = function(page) {
@@ -113,7 +111,11 @@ function splitText(texts) {
 }
 
 router.post('/search', function(req, res, next) {
+  console.log(req.body);
+
   var keyword = req.body.keywords;
+  var confidence = req.body.confidence/10;
+  var support = req.body.support;
   var cachePath = './cache/' + keyword;
 
   if (fs.existsSync(cachePath)) {
@@ -134,7 +136,7 @@ router.post('/search', function(req, res, next) {
     .then(function(texts) {
       console.log("Got texts (",texts.length,")");
       texts = splitText(texts);
-      return getURIs(texts);
+      return getURIs(texts, confidence, support);
     })
     .then(function(URIs) {
       URIs = _.uniq(URIs).sort();
@@ -142,11 +144,11 @@ router.post('/search', function(req, res, next) {
       res.render("results",{array : URIs});
       var output = {ressources : URIs};
       fs.writeFile(cachePath, JSON.stringify(output), function(err) {
-          if(err) {
-            console.log("Error writing cache - ", err);
-          } else {
-            console.log("Request saved to " + cachePath);
-          }
+        if(err) {
+          console.log("Error writing cache - ", err);
+        } else {
+          console.log("Request saved to " + cachePath);
+        }
       }); 
     })
     .catch(function(err) {
@@ -170,7 +172,6 @@ function computeCoeffJaccard(arrayURI1,arrayURI2){
         matching++;  
     }
   }
-
   return matching/(total - matching);
 };
 

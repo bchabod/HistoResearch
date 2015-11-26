@@ -57,6 +57,11 @@ p {
   font-size: 3rem;
 }
 
+.val {
+  color: #Ef7620;
+  font-size: 2rem;
+}
+
 .separator {
   margin: 0 auto;
   width: 50%;
@@ -83,6 +88,10 @@ label {
 }
 
 input {
+  margin: 0 auto;
+}
+
+input[type="text"] {
   display: block;
   margin: 0 auto;
   width: 30%;
@@ -100,7 +109,7 @@ input {
   transition: border-color 1.5s ease-in-out 1s, box-shadow 1.5s ease-in-out 1s;
 }
 
-input:focus {
+input[type="text"]:focus {
   outline: none;
   border-color: #9ecaed;
   box-shadow: 0 0 20px #9ecaed;
