@@ -88,7 +88,8 @@ input {
   width: 30%;
   height: 34px;
   padding: 6px 12px;
-  font-size: 14px;
+  font-size: 20px;
+  font-weight: bold;
   line-height: 1.42857;
   color: #555;
   background-color: #FFF;

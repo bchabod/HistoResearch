@@ -3,7 +3,7 @@ function launchParticlesJS(e, i) {
     pJS.fn.canvasInit(), pJS.fn.canvasSize(), pJS.fn.canvasPaint(), pJS.fn.particlesCreate(), pJS.fn.particlesDraw()
   }
   function t() {
-    //pJS.fn.particlesDraw(), pJS.fn.requestAnimFrame = requestAnimFrame(t)
+    pJS.fn.particlesDraw(), pJS.fn.requestAnimFrame = requestAnimFrame(t)
   }
   var n = e;
   if (pJS = {
@@ -133,6 +133,19 @@ pJS.particles.color_rgb = hexToRgb(pJS.particles.color), pJS.particles.line_link
     var i = pJS.particles.array[e];
     i.draw("rgba(" + i.color.r + "," + i.color.g + "," + i.color.b + "," + i.opacity + ")")
   }
+
+  var ctx=pJS.canvas.ctx;
+  var my_gradient=ctx.createLinearGradient(0,0,pJS.canvas.w,0);
+  my_gradient.addColorStop(0,"hsla(180, 9%, 9%, 0)");
+  my_gradient.addColorStop(0.19,"hsla(180, 9%, 9%, 0)");
+  my_gradient.addColorStop(0.2,"hsla(180, 9%, 9%, 0.8)");
+  my_gradient.addColorStop(0.5,"hsla(180, 9%, 9%, 1)");
+  my_gradient.addColorStop(0.8,"hsla(180, 9%, 9%, 0.8)");
+  my_gradient.addColorStop(0.81,"hsla(180, 9%, 9%, 0)");
+  my_gradient.addColorStop(1,"hsla(180, 9%, 9%, 0)");
+  ctx.fillStyle=my_gradient;
+  ctx.fillRect(0,0,pJS.canvas.w,pJS.canvas.h);
+
 }, pJS.fn.particlesRemove = function () {
   pJS.particles.array = []
 }, pJS.fn.vendors.distanceParticles = function (e, i) {
@@ -211,14 +224,8 @@ window.requestAnimFrame = function () {
   return window.cancelAnimationFrame || window.webkitCancelRequestAnimationFrame || window.mozCancelRequestAnimationFrame || window.oCancelRequestAnimationFrame || window.msCancelRequestAnimationFrame || clearTimeout
 }(), window.particlesJS = function (e, i) {
   "string" != typeof e && (i = e, e = "particles-js"), e || (e = "particles-js");
-  /*
-  var a = document.createElement("canvas");
-  a.style.width = "100%", a.style.height = "100%";
-  */
   var t = document.querySelector("#" + e + " > canvas");
   null != t && launchParticlesJS(t, i);
-  var t2 = document.querySelectorAll("#" + e + " > canvas")[1];
-  null != t2 && launchParticlesJS(t2, i);
 };
 
 window.particlesJS && particlesJS("particles-js", {
@@ -228,7 +235,7 @@ window.particlesJS && particlesJS("particles-js", {
     opacity: 1,
     size: 2.5,
     size_random: !0,
-    nb: 100,
+    nb: 400,
     line_linked: {
       enable_auto: !0,
       distance: 100,
@@ -243,7 +250,7 @@ window.particlesJS && particlesJS("particles-js", {
     },
     anim: {
       enable: !0,
-      speed: 4
+      speed: 2
     },
     array: []
   },

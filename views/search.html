@@ -27,25 +27,14 @@
 
   <section role="content" id="particles-js">
 
-    <canvas style="width: 25%; height: 100%; position:absolute; top:0px; left:0px"></canvas>
-    <canvas style="width: 25%; height: 100%; position:absolute; top:0px; right:0px"></canvas>
+    <canvas style="z-index: -1; width: 100%; height: 100%; position:absolute; top:0px; left:0px"></canvas>
 
-    <div id="container" style="z-index: 1; position:relative">
+    <div id="container">
 
       <h2>What do you want to know ?</h2>
       <p>Please select a search engine and enter keywords</p>
 
       <form method="post" action="/search">
-
-        <div class="form-group">
-          <label>Search engine used : </label>
-          <div class="segmented-control">
-            <input type="radio" name="engine" id="engine0" value="google"  checked  />
-            <input type="radio" name="engine" id="engine1" value="duck"  />
-            <label for="engine0" data-value="Google">Google</label>
-            <label for="engine1" data-value="Duck Duck Go">Duck Duck Go</label>
-          </div>
-        </div>
 
         <input type="text" name="keywords" placeholder="Enter keywords here...">
         <button type="submit" name="searchButton">Search</button>
@@ -62,6 +51,7 @@
     <p>Copyright (c) 2015 <a href="http://google.fr" target="_blank">@WebSearch</a>.</p>
   </footer>
 
+  <script src="main.js"></script>
   <script src="particles.js"></script>
 
 </body>
