@@ -6,8 +6,6 @@ var fs = require('fs');
 var _ = require('lodash');
 var router = express.Router();
 
-var prevURIs=[];
-
 function promiseLoop(array,optionsCallback,resultCallback) {
   var output = [];
   var counter = 0;
@@ -15,7 +13,7 @@ function promiseLoop(array,optionsCallback,resultCallback) {
     array.forEach(function(element) {
       var options = optionsCallback(element);
       rp(options).then(function(body) {
-        output = resultCallback(body, output);
+        output = resultCallback(body, output, element);
         counter++;
         if(counter == array.length) {
           resolve(output);
@@ -71,42 +69,50 @@ function getTexts (urls) {
   return promiseLoop(urls, optionsCallback, buildResult);
 }
 
-function getURIs (pages, confidence, support) {
+function getURIs (texts, confidence, support, nbPages) {
   var timeout = 30000;
-  console.log("Got text splits : " , pages.length);
   var optionsCallback = function(page) {
     return {
       method: 'get',
-      url : 'http://spotlight.dbpedia.org/rest/annotate?text=' + encodeURI(page) + '&confidence=' + confidence + '&support=' + support + '&timeout=' + timeout,
+      url : 'http://spotlight.dbpedia.org/rest/annotate?text=' + encodeURI(page.text) + '&confidence=' + confidence + '&support=' + support + '&timeout=' + timeout,
       headers: {
         'Accept':'application/json'
       }
     }
   };
-  var buildResult = function(body, URIs) {
-    console.log("Got one bunch of URIs");
-    body = JSON.parse(body);
-    for(var element in body["Resources"]){
-      var URI = body["Resources"][element]["@URI"];
-      URIs.push(URI);
-    }
-    return URIs;
+  var buildResult = function(body, URIs, pageOrigin) {
+    if(URIs.length==0) {
+      for (var i=0; i<nbPages; i++) {
+       URIs[i] = [];
+     }
+   }
+   console.log("Got one bunch of URIs for page #", pageOrigin.id);
+   body = JSON.parse(body);
+   for(var element in body["Resources"]){
+    var URI = body["Resources"][element]["@URI"];
+    URIs[pageOrigin.id].push(URI);
   }
-  return promiseLoop(pages, optionsCallback, buildResult);
+  return URIs;
+}
+return promiseLoop(texts, optionsCallback, buildResult);
 }
 
 function splitText(texts) {
   console.log("Splitting texts ! ");
   var MAX = 1500;
   var newTexts = [];
-  texts.forEach(function(element) {
+  for(var i=0;i<texts.length;i++) {
+    var element = texts[i];
     var offset = 0;
     while(offset<element.length) {
-      var substr = element.substring(offset,offset+Math.min(element.length-offset,MAX));
-      newTexts.push(substr);
+      var substr = {
+        id: i,
+        text: element.substring(offset,offset+Math.min(element.length-offset,MAX))
+      };
       offset += MAX;
+      newTexts.push(substr);
     }
-  });
+  };
   return newTexts;
 }
 
@@ -134,23 +140,29 @@ router.post('/search', function(req, res, next) {
       return getTexts(URLs);
     })
     .then(function(texts) {
-      console.log("Got texts (",texts.length,")");
+      var nbPages = texts.length;
+      console.log("Got texts (",nbPages,")");
       texts = splitText(texts);
-      return getURIs(texts, confidence, support);
+      console.log("Got text splits : " , texts.length);
+      return getURIs(texts, confidence, support, nbPages);
     })
     .then(function(URIs) {
-      URIs = _.uniq(URIs).sort();
-      console.log("Got results (",URIs.length,")");
-      res.render("results",{array : URIs});
-      var output = {ressources : URIs};
-      fs.writeFile(cachePath, JSON.stringify(output), function(err) {
-        if(err) {
-          console.log("Error writing cache - ", err);
-        } else {
-          console.log("Request saved to " + cachePath);
-        }
-      }); 
-    })
+      var counter = 0;
+      for (var i=0; i<URIs.length; i++) {
+       URIs[i] = _.uniq(URIs[i]).sort();
+       counter += URIs[i].length;
+     }
+     console.log("Got results (",counter,")");
+     res.render("results",{array : URIs});
+     var output = {ressources : URIs};
+     fs.writeFile(cachePath, JSON.stringify(output), function(err) {
+      if(err) {
+        console.log("Error writing cache - ", err);
+      } else {
+        console.log("Request saved to " + cachePath);
+      }
+    }); 
+   })
     .catch(function(err) {
       console.log("Got error - ", err, err.stack);
       res.send(err);
