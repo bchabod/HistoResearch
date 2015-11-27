@@ -235,7 +235,7 @@ window.particlesJS && particlesJS("particles-js", {
     opacity: 1,
     size: 2.5,
     size_random: !0,
-    nb: 400,
+    nb: 300,
     line_linked: {
       enable_auto: !0,
       distance: 100,

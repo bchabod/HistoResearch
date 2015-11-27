@@ -31,14 +31,39 @@
     </form>
   </div>
 
-  <div id="container" style="text-align: left; left=10%">
-    <% for (var i=0 ; i<array.length;++i) {%>
-        <a href="<%= array[i] %>" style="color: white"><%= array[i] %></a> </br>
-    <% } %>
+  <div class="table" id="container_timeline">
+    <section>
+      <h2 class="table-heading" style="margin-bottom: 2rem;">Evenements historiques pour "<%= keyword %>"</h2>     
+      <table class="data" style="margin-top: 6rem;">
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Event</th>
+            <th scope="col">Description</th>
+            <th scope="col">Photo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (var i=0 ; i<array.length;++i) {%>
+          <tr>
+            <td><%= array[i].date %></td>
+            <td><a href="<%= array[i].link %>" style="color: white; text-decoration: underline;"><%= array[i].name %></a></td>
+            <td><%= array[i].description %></td>
+            <td><img alt="Indisponible" src="<%= array[i].img %>"></td>
+          </tr>
+          <% } %> 
+        </tbody>
+      </table>
+
+    </section>
   </div>
 
-    <footer>
+  <footer>
     <p>Copyright (c) 2015 <a href="/search" target="_blank">@Historesearch</a>.</p>
   </footer>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="main.js"></script>
+
 </body>
 </html>

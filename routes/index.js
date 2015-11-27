@@ -83,18 +83,45 @@ function getURIs (texts, confidence, support, nbPages) {
   var buildResult = function(body, URIs, pageOrigin) {
     if(URIs.length==0) {
       for (var i=0; i<nbPages; i++) {
-       URIs[i] = [];
-     }
-   }
-   console.log("Got one bunch of URIs for page #", pageOrigin.id);
-   body = JSON.parse(body);
-   for(var element in body["Resources"]){
-    var URI = body["Resources"][element]["@URI"];
-    URIs[pageOrigin.id].push(URI);
+        URIs[i] = [];
+      }
+    }
+    console.log("Got one bunch of URIs for page #", pageOrigin.id);
+    body = JSON.parse(body);
+    for(var element in body["Resources"]){
+      var URI = body["Resources"][element]["@URI"];
+      URIs[pageOrigin.id].push(URI);
+    }
+    return URIs;
   }
-  return URIs;
+  return promiseLoop(texts, optionsCallback, buildResult);
 }
-return promiseLoop(texts, optionsCallback, buildResult);
+
+function getEvents (URIs) {
+  var timeout = 30000;
+  var optionsCallback = function(URI) {
+    URI = encodeURIComponent(decodeURI(URI));
+    return {
+      method: 'get',
+      url : 'http://dbpedia.org/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&query=SELECT+DISTINCT+%3FE+%3FDATE+%3FIMG+%3FTEXT+%3FNAME+WHERE+%7B%0D%0A%7B%3FE+rdf%3Atype+dbo%3AEvent%7D+.%0D%0A%7B%3FE+dbo%3Adate+%3FDATE%7D+.%0D%0A%7B%3FE+dbo%3Athumbnail+%3FIMG%7D+.%0D%0A%7B%3FE+rdfs%3Acomment+%3FTEXT%7D+.%0D%0A%7B%3FE+foaf%3Aname+%3FNAME%7D+.%0D%0A%7B%3FE+%3FP+%3C' + URI + '%3E%7D+UNION+%7B%3C' + URI + '%3E+%3FP+%3FE%7D+.%0D%0AFILTER+%28langMatches%28lang%28%3FTEXT%29%2C+%22en%22%29%29+.%0D%0A%7D&format=application%2Fsparql-results%2Bjson&CXML_redir_for_subjs=121&CXML_redir_for_hrefs=&timeout=30000&debug=on',
+      headers: {}
+    }
+  };
+  var buildResult = function(body, events) {
+    body = JSON.parse(body);
+    body["results"]["bindings"].forEach(function(element) { 
+      var event = {
+        link: element["E"]["value"],
+        name: element["NAME"]["value"],
+        description: element["TEXT"]["value"],
+        date: element["DATE"]["value"],
+        img: element["IMG"]["value"]
+      }
+      events.push(event);
+    });
+    return events;
+  }
+  return promiseLoop(URIs, optionsCallback, buildResult);
 }
 
 function splitText(texts) {
@@ -131,7 +158,14 @@ router.post('/search', function(req, res, next) {
         return console.log("Error reading cache - ", err);
       }
       data = JSON.parse(data);
-      res.render("results",{array : data.ressources});
+      getEvents(_.flatten(data.ressources)).then(function(events) {
+        events = _.uniq(events, function(item) { 
+          return item.name;
+        });
+        events = events = _.sortBy(events, function(o) { return o.date; });
+        console.log("Got events (",events.length,")");
+        res.render("results",{array : events});
+      });
     });
   } else {
     console.log("Request for keywords : ", keyword);
@@ -149,20 +183,28 @@ router.post('/search', function(req, res, next) {
     .then(function(URIs) {
       var counter = 0;
       for (var i=0; i<URIs.length; i++) {
-       URIs[i] = _.uniq(URIs[i]).sort();
-       counter += URIs[i].length;
-     }
-     console.log("Got results (",counter,")");
-     res.render("results",{array : URIs});
-     var output = {ressources : URIs};
-     fs.writeFile(cachePath, JSON.stringify(output), function(err) {
-      if(err) {
-        console.log("Error writing cache - ", err);
-      } else {
-        console.log("Request saved to " + cachePath);
+        URIs[i] = _.uniq(URIs[i]).sort();
+        counter += URIs[i].length;
       }
-    }); 
-   })
+      console.log("Got results (",counter,")");
+      var output = {ressources : URIs};
+      fs.writeFile(cachePath, JSON.stringify(output), function(err) {
+        if(err) {
+          console.log("Error writing cache - ", err);
+        } else {
+          console.log("Request saved to " + cachePath);
+        }
+      });
+      return getEvents(_.flatten(URIs));
+    })
+    .then(function(events) {
+      events = _.uniq(events, function(item) { 
+          return item.name;
+      });
+      events = events = _.sortBy(events, function(o) { return o.date; });
+      console.log("Got events (",events.length,")");
+      res.render("results",{array : events, keyword: keyword});
+    })
     .catch(function(err) {
       console.log("Got error - ", err, err.stack);
       res.send(err);
