@@ -11,5 +11,5 @@ window.addEventListener("load", function(){
       document.getElementById("support").innerHTML = this.value;
     });
   }
-  
+
 });

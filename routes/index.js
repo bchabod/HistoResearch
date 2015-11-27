@@ -74,7 +74,7 @@ function getURIs (texts, confidence, support, nbPages) {
   var optionsCallback = function(page) {
     return {
       method: 'get',
-      url : 'http://spotlight.dbpedia.org/rest/annotate?text=' + encodeURI(page.text) + '&confidence=' + confidence + '&support=' + support + '&timeout=' + timeout,
+      url : 'http://spotlight.dbpedia.org/rest/annotate?text=' + encodeURI(page) + '&confidence=' + confidence + '&support=' + support + '&timeout=' + timeout,
       headers: {
         'Accept':'application/json'
       }
@@ -150,6 +150,7 @@ router.post('/search', function(req, res, next) {
   var confidence = req.body.confidence/10;
   var support = req.body.support;
   var cachePath = './cache/' + keyword;
+  var network;
 
   if (fs.existsSync(cachePath)) {
     console.log("Cache for keywords : ", keyword);
@@ -183,11 +184,12 @@ router.post('/search', function(req, res, next) {
     .then(function(URIs) {
       var counter = 0;
       for (var i=0; i<URIs.length; i++) {
-        URIs[i] = _.uniq(URIs[i]).sort();
-        counter += URIs[i].length;
-      }
-      console.log("Got results (",counter,")");
-      var output = {ressources : URIs};
+       URIs[i] = _.uniq(URIs[i]).sort();
+       counter += URIs[i].length;
+     }
+     console.log("Got results (",counter,")");
+     var network = computeGraph(URIs,keyword);
+     var output = {ressources : URIs};
       fs.writeFile(cachePath, JSON.stringify(output), function(err) {
         if(err) {
           console.log("Error writing cache - ", err);
@@ -203,7 +205,7 @@ router.post('/search', function(req, res, next) {
       });
       events = events = _.sortBy(events, function(o) { return o.date; });
       console.log("Got events (",events.length,")");
-      res.render("results",{array : events, keyword: keyword});
+      res.render("results",{array : events, keyword: keyword, network: network});
     })
     .catch(function(err) {
       console.log("Got error - ", err, err.stack);
@@ -216,16 +218,61 @@ router.get('/search', function(req, res, next) {
   res.render('search');
 });
 
+function computeGraph(URIs, keyword)
+{
+  var edges=[];
+  var nodes=[];
+  for(var i=0;i<URIs.length;++i)
+  {
+    edges[i]=[];
+    nodes[i]=0;
+  }
+  for(var i=0;i<URIs.length;++i){
+    for(var j=0;j<URIs.length;++j){
+      if(i==j)
+        edges[i][j]=0;
+      else if(computeCoeffJaccard(URIs[i],URIs[j])>0.1)
+      {
+        edges[i][j]=1;
+        nodes[i]=1;
+        nodes[j]=1;
+      }
+      else 
+        edges[i][j]=0;
+    }
+  }
+  var data='dinetwork {';
+  var first=0;
+  for(var i=0;i<URIs.length;++i){
+    text="";
+    for(var j=i+1;j<URIs.length;++j){
+      if(edges[i][j]==1 && first==1)
+        data+=';' + (i+1) + ' -- ' + (j+1);
+      else if(edges[i][j]==1 && first==0)
+      {
+       data+= (i+1) +' -- ' + (j+1); 
+       first=1;
+      }
+      text+=edges[i][j]+" ";
+    }
+    console.log(text);
+  }
+  data+='}';
+  console.log(data);
+  return data;
+}
+
 function computeCoeffJaccard(arrayURI1,arrayURI2){
   var total= arrayURI1.length + arrayURI2.length;
   var matching=0;
   for(var i=0;i<arrayURI1.length;++i){
     for(var j=0;j<arrayURI2.length;++j)
     {
-      if(arrayURI1[i]===arrayURI2[j])
+      if(arrayURI1[i]==arrayURI2[j])
         matching++;  
     }
   }
+
   return matching/(total - matching);
 };
 
