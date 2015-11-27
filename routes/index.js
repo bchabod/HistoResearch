@@ -165,7 +165,8 @@ router.post('/search', function(req, res, next) {
         });
         events = events = _.sortBy(events, function(o) { return o.date; });
         console.log("Got events (",events.length,")");
-        res.render("results",{array : events});
+        var network = computeGraph(events);
+        res.render("results",{array : events, keyword: keyword, network: network});
       });
     });
   } else {
@@ -218,7 +219,7 @@ router.get('/search', function(req, res, next) {
   res.render('search');
 });
 
-function computeGraph(URIs, keyword)
+function computeGraph(URIs)
 {
   var edges=[];
   var nodes=[];
