@@ -55,7 +55,7 @@ function getTexts (urls) {
   var optionsCallback = function(url) {
     return {
       method: 'get',
-      url : 'https://access.alchemyapi.com/calls/url/URLGetText?apikey=df295c00eafc10dcecf7318f57c54d216107017f&url=' + url + '&outputMode=json',
+      url : 'https://access.alchemyapi.com/calls/url/URLGetText?apikey=d9d4e472b3bc7baac32dc3944cac4796b7bbd951&url=' + url + '&outputMode=json',
       headers: {
         'Accept':'application/json',
       }
@@ -74,7 +74,7 @@ function getURIs (texts, confidence, support, nbPages) {
   var optionsCallback = function(page) {
     return {
       method: 'get',
-      url : 'http://spotlight.dbpedia.org/rest/annotate?text=' + encodeURI(page) + '&confidence=' + confidence + '&support=' + support + '&timeout=' + timeout,
+      url : 'http://spotlight.dbpedia.org/rest/annotate?text=' + encodeURI(page.text) + '&confidence=' + confidence + '&support=' + support + '&timeout=' + timeout,
       headers: {
         'Accept':'application/json'
       }
@@ -125,7 +125,7 @@ function getEvents (URIs) {
 }
 
 function splitText(texts) {
-  console.log("Splitting texts ! ");
+  console.log("Splitting texts !");
   var MAX = 1500;
   var newTexts = [];
   for(var i=0;i<texts.length;i++) {
@@ -150,7 +150,7 @@ router.post('/search', function(req, res, next) {
   var confidence = req.body.confidence/10;
   var support = req.body.support;
   var cachePath = './cache/' + keyword;
-  var network;
+  var network, links;
 
   if (fs.existsSync(cachePath)) {
     console.log("Cache for keywords : ", keyword);
@@ -159,20 +159,23 @@ router.post('/search', function(req, res, next) {
         return console.log("Error reading cache - ", err);
       }
       data = JSON.parse(data);
-      getEvents(_.flatten(data.ressources)).then(function(events) {
+      var URIs = data.ressources;
+      links = data.links;
+      getEvents(_.flatten(URIs)).then(function(events) {
         events = _.uniq(events, function(item) { 
           return item.name;
         });
         events = events = _.sortBy(events, function(o) { return o.date; });
         console.log("Got events (",events.length,")");
-        var network = computeGraph(events);
-        res.render("results",{array : events, keyword: keyword, network: network});
+        network = computeGraph(URIs);
+        res.render("results", {array : events, keyword: keyword, network: network, links : links});
       });
     });
   } else {
     console.log("Request for keywords : ", keyword);
     getResult(keyword).then(function(URLs) {
       console.log("Got URLs (",URLs.length,")");
+      links = URLs;
       return getTexts(URLs);
     })
     .then(function(texts) {
@@ -189,8 +192,8 @@ router.post('/search', function(req, res, next) {
        counter += URIs[i].length;
      }
      console.log("Got results (",counter,")");
-     var network = computeGraph(URIs,keyword);
-     var output = {ressources : URIs};
+     network = computeGraph(URIs,keyword);
+     var output = {ressources : URIs, links : links};
       fs.writeFile(cachePath, JSON.stringify(output), function(err) {
         if(err) {
           console.log("Error writing cache - ", err);
@@ -206,7 +209,7 @@ router.post('/search', function(req, res, next) {
       });
       events = events = _.sortBy(events, function(o) { return o.date; });
       console.log("Got events (",events.length,")");
-      res.render("results",{array : events, keyword: keyword, network: network});
+      res.render("results",{array : events, keyword: keyword, network: network, links: links});
     })
     .catch(function(err) {
       console.log("Got error - ", err, err.stack);
@@ -232,7 +235,7 @@ function computeGraph(URIs)
     for(var j=0;j<URIs.length;++j){
       if(i==j)
         edges[i][j]=0;
-      else if(computeCoeffJaccard(URIs[i],URIs[j])>0.1)
+      else if(computeCoeffJaccard(URIs[i],URIs[j])>0.01)
       {
         edges[i][j]=1;
         nodes[i]=1;

@@ -36,10 +36,35 @@
     <form method="post" action="/search">
 
       <input type="text" style="text-align:left" name="keywords" placeholder="Enter keywords here...">
-      <button type="submit" name="searchButton">Search</button>
-
+      <button type="submit" name="searchButton" style="margin-bottom: 2rem;">Search</button>
     </form>
   </div>
+
+  <div class="separator"></div>
+
+  <table class="data" style="margin-top: 2rem; margin:0 auto; color:red;">
+    <tbody>
+      <tr>
+        <td>
+          <div id="mynetwork"></div>
+        </td>
+        <td>
+          <table class="data" border="1">
+            <tbody>
+              <% for (var i=0 ; i<links.length;++i) {%>
+              <tr>
+                <td><%= i+1  %></td>
+                <td><a href="<%= links[i] %>" style="color: red; text-decoration: underline;"><%= links[i] %></a></td>
+              </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="separator"></div>
 
   <div class="table" id="container_timeline">
     <section>
@@ -59,7 +84,7 @@
             <td><%= array[i].date %></td>
             <td><a href="<%= array[i].link %>" style="color: white; text-decoration: underline;"><%= array[i].name %></a></td>
             <td><%= array[i].description %></td>
-            <td><img alt="Indisponible" src="<%= array[i].img %>"></td>
+            <td><img alt="Indisponible" src="<%= array[i].img %>" style="max-height: 100px;"></td>
           </tr>
           <% } %> 
         </tbody>
@@ -68,49 +93,48 @@
     </section>
   </div>
 
-  <div id="mynetwork"> </div>
-
   <footer>
     <p>Copyright (c) 2015 <a href="/search" target="_blank">@Historesearch</a>.</p>
   </footer>
 
   <script src="main.js"></script>
 
-  <div id="cache" style="display: none">
+  <div id="cache">
     <%= network %>
   </div>
 
   <script type="text/javascript">
-  // provide data in the DOT language
-  var DOTstring = document.getElementById("cache").innerHTML;
-  var parsedData = vis.network.convertDot(DOTstring);
 
-  var data = {
-    nodes: parsedData.nodes,
-    edges: parsedData.edges
-  }
+    // provide data in the DOT language
+    var DOTstring = document.getElementById("cache").innerHTML;
+    var parsedData = vis.network.convertDot(DOTstring);
 
-  var options = parsedData.options;
-
-  // you can extend the options like a normal JSON variable:
-  options = {
-    width: '100%',
-    height: '500px',
-    margin: {
-      item: 20
+    var data = {
+      nodes: parsedData.nodes,
+      edges: parsedData.edges
     }
-  };
-  options.nodes = {
-    color: 'red'
-  }
 
-      // create a network
-      var container = document.getElementById('mynetwork');
+    var options = parsedData.options;
 
-  // create a network
-  var network = new vis.Network(container, data, options);
+    // you can extend the options like a normal JSON variable:
+    options = {
+      width: '100%',
+      height: '500px',
+      margin: {
+        item: 20
+      }
+    };
+    options.nodes = {
+      color: 'red'
+    }
 
-</script>
+    // create a network
+    var container = document.getElementById('mynetwork');
 
-</body>
-</html>
+    // create a network
+    var network = new vis.Network(container, data, options);
+
+    </script>
+
+  </body>
+  </html>
